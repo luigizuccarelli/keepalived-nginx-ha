@@ -1,0 +1,93 @@
+! Configuration File for keepalived
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface eth0
+    virtual_router_id 51
+    priority 150
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass $ place secure password here.
+    }
+    virtual_ipaddress {
+        10.32.75.200
+    }
+}
+Create the config file on the second server (10.32.75.14):
+
+vim /etc/keepalived/keepalived.conf
+Edit and paste the following config:
+
+! Configuration File for keepalived
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface eth0
+    virtual_router_id 51
+    priority 100
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass $ place secure password here.
+    }
+    virtual_ipaddress {
+        10.32.75.200
+    }
+}
+The priority must be highest on the server you want to be the master/primary. It can be 150 on the master, and 100, 99, 98, 97 on the slaves. The virtual_router_id must be the same on all nodes and the auth_pass must also be the same. My network configuration is on eth0, change it if yours is on another one.
+
+Configuring NGINX
+For this example I have set up a very simple NGINX server with a very simple HTML page.
+
+vim /usr/share/nginx/html/index.html
+Server 1:
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Keepalived 1!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Keepalived 1 - MASTER!</h1>
+</body>
+</html>
+Server 2:
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Keepalived 2!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Keepalived 2 - backup!</h1>
+</body>
+</html>
+sysctl
+In order to be able to bind on a IP which is not yet defined on the system, we need to enable non local binding at the kernel level.
+
+Temporary:
+
+echo 1 > /proc/sys/net/ipv4/ip_nonlocal_bind
+Permanent:
+
+Add this to /etc/sysctl.conf:
+
+net.ipv4.ip_nonlocal_bind = 1
+Enable with:
+
+sysctl -p
