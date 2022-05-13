@@ -1,0 +1,7 @@
+{
+  "code": 403,
+  "statuscode": "403",
+  "status": "access forbidden",
+  "message": "You dont have the correct authorization to access this endpoint",
+  "payload": null
+}
